@@ -1,9 +1,14 @@
 import mongoose from "mongoose";
-import config from "config";
 import logger from './logger';
+require('dotenv').config();
 
 async function connect() {
-    const dbUri = config.get<string>("dbUri");
+    const dbUri = process.env.dbUri;
+
+    if (!dbUri) {
+        logger.error("Database URI (dbUri) is not defined in the environment variables.");
+        process.exit(1);
+    }
 
     try {
         await mongoose.connect(dbUri);

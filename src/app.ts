@@ -1,17 +1,17 @@
 import express, { Application } from 'express';
-import config from 'config';
 import cors from 'cors';
 import routes from './routes';
 import connect from './utils/connect'; 
 import logger from './utils/logger';
+require('dotenv').config();
 
 const app: Application = express();
-const PORT = config.get<number>("port");
+const PORT = process.env.port || 3333;
 
 connect();
 
 const corsOptions = {
-    origin: config.get<string>("origin")
+    origin: "https://dc-backend-client.vercel.app"
 };
   
 app.use(cors(corsOptions));
