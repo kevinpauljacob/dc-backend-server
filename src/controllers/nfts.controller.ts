@@ -1,23 +1,42 @@
 import { Request, Response } from 'express';
-import NFTModel, { NFT } from '../models/nfts.model';
+import NFTModel, { NFTDocument } from '../models/nfts.model';
 
 export const getNFTData = async (req: Request, res: Response) => {
   try {
-    const nftData: NFT[] = await NFTModel.find({}, { _id: 0 }).lean();
-    const nft = nftData.map((item) => item.nft);
-    res.json({nfts: nft});
+    const nftData: NFTDocument | null = await NFTModel.findOne({});
+    console.log(nftData);
+    if (nftData) {
+      const { nfts } = nftData;
+      res.json({ nfts });
+    } else {
+      res.status(404).json({ message: 'No NFT data found' });
+    }
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
 
+  
+  
 export const addNFTData = async (req: Request, res: Response) => {
     try {
       const { newNFTData } = req.body;
   
-      const nftData = new NFTModel({ nft: newNFTData });
-      await nftData.save();
+      const nftKey = Object.keys(newNFTData)[0];
+      const nftValue = Object.values(newNFTData)[0];
+  
+      const query = {};
+  
+      const update = {
+        $set: {
+          [`nfts.${nftKey}`]: nftValue
+        }
+      };
+  
+      const options = { upsert: true };
+  
+      await NFTModel.updateOne(query, update, options);
   
       res.status(201).json({ message: 'Data added successfully' });
     } catch (err) {
@@ -25,4 +44,7 @@ export const addNFTData = async (req: Request, res: Response) => {
       res.status(500).json({ error: 'Internal Server Error' });
     }
   };
+  
+
+
   
